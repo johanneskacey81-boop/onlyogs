@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Feed</title>
+</head>
+<body>
+    <h1>OnlyOGs Feed</h1>
+    <a href="{{ url_for('create_post') }}">Create Post</a>
+    <a href="{{ url_for('logout') }}">Logout</a>
+    
+    <div>
+        {% for post in posts %}
+        <div style="border: 1px solid #ccc; padding: 10px; margin: 10px 0;">
+            <h3>{{ post.author.display_name }}</h3>
+            <p>{{ post.content }}</p>
+            {% if post.image_url %}
+            <img src="{{ post.image_url }}" style="max-width: 300px;">
+            {% endif %}
+            <p>❤️ {{ post.likes_count }} likes</p>
+            <a href="{{ url_for('like_post', post_id=post.id) }}">Like</a>
+        </div>
+        {% endfor %}
+    </div>
+</body>
+</html>
