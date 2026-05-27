@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Create Post</title>
+</head>
+<body>
+    <h1>Create Post</h1>
+    <form method="POST">
+        <textarea name="content" placeholder="What's on your mind?" required></textarea>
+        <input type="url" name="image_url" placeholder="Image URL (optional)">
+        <button type="submit">Post</button>
+    </form>
+    <a href="{{ url_for('feed') }}">Back to Feed</a>
+</body>
+</html>
