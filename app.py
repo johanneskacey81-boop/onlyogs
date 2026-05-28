@@ -1,28 +1,54 @@
-import os
-from flask import Flask, render_template, redirect, url_for, request
+1  from flask import Flask, render_template, request, redirect
+2  from flask_sqlalchemy import SQLAlchemy
+3  from flask_login import LoginManager
+4   
+5  # -------------------------
+# Imports
+# -------------------------
+from flask import Flask, render_template, request, redirect
 from flask_sqlalchemy import SQLAlchemy
-from flask_login import LoginManager, UserMixin, login_user, logout_user, current_user, login_required
-from datetime import datetime
-from werkzeug.security import generate_password_hash, check_password_hash
+from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required
+import os
 
+# -------------------------
+# App + DB Setup
+# -------------------------
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'dev-secret'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///onlyogs.db'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config["SECRET_KEY"] = "secret123"
+app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///onlyogs.db"
 
 db = SQLAlchemy(app)
-login_manager = LoginManager(app)
-login_manager.login_view = 'login'
+
+# -------------------------
+# Login Manager (THIS IS THE PART YOU ASKED ABOUT)
+# -------------------------
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = "login"
+
+# -------------------------
+# User Model
+# -------------------------
+class User(db.Model, UserMixin):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(80), unique=True)
+    password = db.Column(db.String(200))
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
+
+
 
 # ================= MODELS =================
 
-class User(UserMixin, db.Model):
-    __tablename__ = 'users'
+from flask_login import UserMixin
 
+class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
-    email = db.Column(db.String(120), unique=True, nullable=False)
-    password_hash = db.Column(db.String(255), nullable=False)
+    password = db.Column(db.String(200), nullable=False)
+
     display_name = db.Column(db.String(120), nullable=False)
 
     posts = db.relationship('Post', backref='author', lazy=True)
