@@ -85,19 +85,23 @@ def signup():
     return render_template('signup.html')
 
 
-@app.route('/login', methods=['GET', 'POST'])
+from flask_login import login_user
+
+@app.route("/login", methods=["GET", "POST"])
 def login():
-    if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
+    if request.method == "POST":
+        username = request.form.get("username")
+        password = request.form.get("password")
 
         user = User.query.filter_by(username=username).first()
 
-        if user and user.check_password(password):
+        if user and user.password == password:
             login_user(user)
-            return redirect(url_for('feed'))
+            return redirect("/feed")
+        else:
+            return render_template("login.html", error="Invalid credentials")
 
-    return render_template('login.html')
+    return render_template("login.html")
 
 
 @app.route('/logout')
