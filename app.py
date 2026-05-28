@@ -152,6 +152,12 @@ def like_post(post_id):
 
 if __name__ == '__main__':
     with app.app_context():
-        db.create_all()
+        db.create_all()with app.app_context():
+    if not User.query.filter_by(username="admin").first():
+        default_user = User(username="admin", password="admin123")
+        db.session.add(default_user)
+        db.session.commit()
+        print("Default user created: admin / admin123")
+
 
     app.run(debug=False)
