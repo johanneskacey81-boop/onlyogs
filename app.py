@@ -21,7 +21,7 @@ db = SQLAlchemy(app)
 # -------------------------
 login_manager = LoginManager()
 login_manager.init_app(app)
-login_manager.login_view = "login"   # used only when @login_required is hit
+login_manager.login_view = "login"
 
 # -------------------------
 # Models
@@ -49,19 +49,18 @@ with app.app_context():
         db.session.add(admin)
         db.session.commit()
         print("Default admin created: admin / admin123")
-@app.route("/feed")
-def feed():
-    posts = Post.query.all()
-    return render_template("feed.html", posts=posts)
 
 # -------------------------
 # PUBLIC routes
 # -------------------------
 @app.route("/")
 def home():
-    return render_template("index.html")
+    return render_template("index.html", user=current_user if current_user.is_authenticated else None)
 
-
+@app.route("/feed")
+def feed():
+    posts = Post.query.all()
+    return render_template("feed.html", posts=posts, user=current_user if current_user.is_authenticated else None)
 
 # -------------------------
 # Auth routes
@@ -74,21 +73,19 @@ def login():
 
         user = User.query.filter_by(username=username).first()
 
-        # simple check (no hashing yet)
         if user and user.password == password:
-            login_user(user)          # creates session
+            login_user(user)
             next_page = request.args.get("next") or url_for("feed")
             return redirect(next_page)
         else:
-            error = "Invalid username or password"
-            return render_template("login.html", error=error)
+            return render_template("login.html", error="Invalid username or password")
 
     return render_template("login.html")
 
 @app.route("/logout")
 @login_required
 def logout():
-    logout_user()                     # clears session
+    logout_user()
     return redirect(url_for("home"))
 
 # -------------------------
@@ -100,7 +97,7 @@ def profile():
     return render_template("profile.html", user=current_user)
 
 # -------------------------
-# Run
+# Run (Render compatible)
 # -------------------------
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
