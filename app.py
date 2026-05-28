@@ -82,7 +82,9 @@ def post_comments(post_id):
 # -------------------------
 # PUBLIC routes
 # -------------------------
-return redirect("/feed")
+@app.route("/")
+def home():
+    return redirect("/feed")
 
 
         "index.html",
