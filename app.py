@@ -4,7 +4,9 @@ from flask_login import (
     LoginManager, UserMixin,
     login_user, logout_user, login_required, current_user
 )
+from werkzeug.security import generate_password_hash, check_password_hash
 import os
+from datetime import datetime
 
 # -------------------------
 # App + DB setup
@@ -34,37 +36,97 @@ class User(db.Model, UserMixin):
 class Post(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     body = db.Column(db.Text, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
+    user = db.relationship("User", backref="posts")
+
+class Like(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
+    post_id = db.Column(db.Integer, db.ForeignKey("post.id"))
+
+class Comment(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    body = db.Column(db.Text, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
+    post_id = db.Column(db.Integer, db.ForeignKey("post.id"))
 
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
 
 # -------------------------
-# One‑time DB + default admin
+# DB + default admin
 # -------------------------
 with app.app_context():
     db.create_all()
     if not User.query.filter_by(username="admin").first():
-        admin = User(username="admin", password="admin123")
+        admin = User(
+            username="admin",
+            password=generate_password_hash("admin123")
+        )
         db.session.add(admin)
         db.session.commit()
         print("Default admin created: admin / admin123")
+
+# -------------------------
+# Helpers
+# -------------------------
+def post_like_count(post_id):
+    return Like.query.filter_by(post_id=post_id).count()
+
+def post_comments(post_id):
+    return Comment.query.filter_by(post_id=post_id).order_by(Comment.created_at.asc()).all()
 
 # -------------------------
 # PUBLIC routes
 # -------------------------
 @app.route("/")
 def home():
-    return render_template("index.html", user=current_user if current_user.is_authenticated else None)
+    return render_template(
+        "index.html",
+        user=current_user if current_user.is_authenticated else None
+    )
 
 @app.route("/feed")
 def feed():
-    posts = Post.query.all()
-    return render_template("feed.html", posts=posts, user=current_user if current_user.is_authenticated else None)
+    posts = Post.query.order_by(Post.created_at.desc()).all()
+    data = []
+    for p in posts:
+        data.append({
+            "post": p,
+            "likes": post_like_count(p.id),
+            "comments": post_comments(p.id)
+        })
+    return render_template(
+        "feed.html",
+        posts=data,
+        user=current_user if current_user.is_authenticated else None
+    )
 
 # -------------------------
 # Auth routes
 # -------------------------
+@app.route("/signup", methods=["GET", "POST"])
+def signup():
+    if request.method == "POST":
+        username = request.form.get("username")
+        password = request.form.get("password")
+
+        if User.query.filter_by(username=username).first():
+            return render_template("signup.html", error="Username already taken")
+
+        hashed_pw = generate_password_hash(password)
+        new_user = User(username=username, password=hashed_pw)
+        db.session.add(new_user)
+        db.session.commit()
+
+        login_user(new_user)
+        return redirect(url_for("feed"))
+
+    return render_template("signup.html")
+
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
@@ -73,7 +135,7 @@ def login():
 
         user = User.query.filter_by(username=username).first()
 
-        if user and user.password == password:
+        if user and check_password_hash(user.password, password):
             login_user(user)
             next_page = request.args.get("next") or url_for("feed")
             return redirect(next_page)
@@ -89,12 +151,64 @@ def logout():
     return redirect(url_for("home"))
 
 # -------------------------
-# Example protected route
+# Posting
 # -------------------------
-@app.route("/profile")
+@app.route("/create_post", methods=["POST"])
 @login_required
-def profile():
-    return render_template("profile.html", user=current_user)
+def create_post():
+    body = request.form.get("body")
+    if body:
+        post = Post(body=body, user_id=current_user.id)
+        db.session.add(post)
+        db.session.commit()
+    return redirect(url_for("feed"))
+
+# -------------------------
+# Likes
+# -------------------------
+@app.route("/like/<int:post_id>")
+@login_required
+def like(post_id):
+    existing = Like.query.filter_by(user_id=current_user.id, post_id=post_id).first()
+    if not existing:
+        like = Like(user_id=current_user.id, post_id=post_id)
+        db.session.add(like)
+        db.session.commit()
+    return redirect(request.referrer or url_for("feed"))
+
+# -------------------------
+# Comments
+# -------------------------
+@app.route("/comment/<int:post_id>", methods=["POST"])
+@login_required
+def comment(post_id):
+    body = request.form.get("body")
+    if body:
+        c = Comment(body=body, user_id=current_user.id, post_id=post_id)
+        db.session.add(c)
+        db.session.commit()
+    return redirect(request.referrer or url_for("feed"))
+
+# -------------------------
+# Profiles
+# -------------------------
+@app.route("/user/<username>")
+def user_profile(username):
+    user_obj = User.query.filter_by(username=username).first_or_404()
+    posts = Post.query.filter_by(user_id=user_obj.id).order_by(Post.created_at.desc()).all()
+    data = []
+    for p in posts:
+        data.append({
+            "post": p,
+            "likes": post_like_count(p.id),
+            "comments": post_comments(p.id)
+        })
+    return render_template(
+        "profile.html",
+        profile_user=user_obj,
+        posts=data,
+        user=current_user if current_user.is_authenticated else None
+    )
 
 # -------------------------
 # Run (Render compatible)
