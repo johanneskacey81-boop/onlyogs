@@ -82,9 +82,8 @@ def post_comments(post_id):
 # -------------------------
 # PUBLIC routes
 # -------------------------
-@app.route("/")
-def home():
-    return redirect("/feed")
+return redirect("/feed")
+
 
         "index.html",
         user=current_user if current_user.is_authenticated else None
