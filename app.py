@@ -86,11 +86,6 @@ def post_comments(post_id):
 def home():
     return redirect("/feed")
 
-
-        "index.html",
-        user=current_user if current_user.is_authenticated else None
-    )
-
 @app.route("/feed")
 def feed():
     posts = Post.query.order_by(Post.created_at.desc()).all()
