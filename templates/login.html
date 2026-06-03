@@ -1,15 +1,29 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Login</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - OnlyOGs</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <h1>Login</h1>
-    <form method="POST">
-        <input type="text" name="username" placeholder="Username" required>
-        <input type="password" name="password" placeholder="Password" required>
-        <button type="submit">Login</button>
-    </form>
-    <p>Don't have an account? <a href="{{ url_for('signup') }}">Sign up</a></p>
+    <div class="header">
+        <h1>🔥 OnlyOGs</h1>
+    </div>
+
+    <div class="form-container">
+        <h1>Login</h1>
+        {% if error %}
+        <div class="error">{{ error }}</div>
+        {% endif %}
+        <form method="POST">
+            <input type="text" name="username" placeholder="Username" required>
+            <input type="password" name="password" placeholder="Password" required>
+            <button type="submit">Login</button>
+        </form>
+        <div class="form-footer">
+            Don't have an account? <a href="{{ url_for('signup') }}">Sign up here</a>
+        </div>
+    </div>
 </body>
 </html>
