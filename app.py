@@ -31,6 +31,7 @@ login_manager.login_view = "login"
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
+    email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(200), nullable=False)
 
 class Post(db.Model):
@@ -51,6 +52,7 @@ class Comment(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
     post_id = db.Column(db.Integer, db.ForeignKey("post.id"))
+    user = db.relationship("User", backref="comments")
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -64,6 +66,7 @@ with app.app_context():
     if not User.query.filter_by(username="admin").first():
         admin = User(
             username="admin",
+            email="admin@onlyogs.com",
             password=generate_password_hash("admin123")
         )
         db.session.add(admin)
@@ -109,13 +112,17 @@ def feed():
 def signup():
     if request.method == "POST":
         username = request.form.get("username")
+        email = request.form.get("email")
         password = request.form.get("password")
 
         if User.query.filter_by(username=username).first():
             return render_template("signup.html", error="Username already taken")
+        
+        if User.query.filter_by(email=email).first():
+            return render_template("signup.html", error="Email already registered")
 
         hashed_pw = generate_password_hash(password)
-        new_user = User(username=username, password=hashed_pw)
+        new_user = User(username=username, email=email, password=hashed_pw)
         db.session.add(new_user)
         db.session.commit()
 
@@ -150,15 +157,18 @@ def logout():
 # -------------------------
 # Posting
 # -------------------------
-@app.route("/create_post", methods=["POST"])
+@app.route("/create_post", methods=["GET", "POST"])
 @login_required
 def create_post():
-    body = request.form.get("body")
-    if body:
-        post = Post(body=body, user_id=current_user.id)
-        db.session.add(post)
-        db.session.commit()
-    return redirect(url_for("feed"))
+    if request.method == "POST":
+        body = request.form.get("body")
+        if body:
+            post = Post(body=body, user_id=current_user.id)
+            db.session.add(post)
+            db.session.commit()
+        return redirect(url_for("feed"))
+    
+    return render_template("create_post.html")
 
 # -------------------------
 # Likes
@@ -212,4 +222,4 @@ def user_profile(username):
 # -------------------------
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port)
+    app.run(host="0.0.0.0", port=port, debug=False)

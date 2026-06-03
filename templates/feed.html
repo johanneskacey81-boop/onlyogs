@@ -1,27 +1,72 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Feed</title>
+    <title>OnlyOGs Feed</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: #f5f5f5; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .header h1 { margin: 0; }
+        .auth-buttons { display: flex; gap: 10px; }
+        .post { background: white; border: 1px solid #ddd; padding: 15px; margin: 10px 0; border-radius: 5px; }
+        .post-header { margin-bottom: 10px; }
+        .username { font-weight: 600; color: #333; text-decoration: none; }
+        .username:hover { text-decoration: underline; }
+        .timestamp { color: #999; font-size: 0.9em; margin-left: 10px; }
+        .post-body { margin: 10px 0; color: #333; line-height: 1.5; }
+        .post-actions { display: flex; gap: 15px; color: #666; margin-top: 10px; }
+        .post-actions a { color: #666; text-decoration: none; }
+        .post-actions a:hover { color: #007bff; }
+        button { background: #007bff; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-weight: 600; }
+        button:hover { background: #0056b3; }
+        .create-btn { margin-bottom: 20px; }
+        .empty { text-align: center; padding: 40px; color: #999; background: white; border-radius: 5px; }
+    </style>
 </head>
 <body>
-    <h1>OnlyOGs Feed</h1>
-    <a href="{{ url_for('create_post') }}">Create Post</a>
-    <a href="{{ url_for('logout') }}">Logout</a>
-    {{ post.user.username }}
-
-    <div>
-        {% for post in posts %}
-        <div style="border: 1px solid #ccc; padding: 10px; margin: 10px 0;">
-           
-            <p>{{ post.content }}</p>
-            {% if post.image_url %}
-            <img src="{{ post.image_url }}" style="max-width: 300px;">
+    <div class="header">
+        <h1>OnlyOGs Feed</h1>
+        <div class="auth-buttons">
+            {% if user and user.is_authenticated %}
+                <span>Welcome, <a href="{{ url_for('user_profile', username=user.username) }}" class="username">{{ user.username }}</a></span>
+                <a href="{{ url_for('logout') }}"><button>Logout</button></a>
+            {% else %}
+                <a href="{{ url_for('login') }}"><button>Login</button></a>
+                <a href="{{ url_for('signup') }}"><button>Sign Up</button></a>
             {% endif %}
-            <p>❤️ {{ post.likes_count }} likes</p>
-            <a href="{{ url_for('like_post', post_id=post.id) }}">Like</a>
+        </div>
+    </div>
+
+    {% if user and user.is_authenticated %}
+    <div class="create-btn">
+        <a href="{{ url_for('create_post') }}"><button>📝 Create Post</button></a>
+    </div>
+    {% endif %}
+
+    {% if posts %}
+        {% for post_data in posts %}
+        <div class="post">
+            <div class="post-header">
+                <a href="{{ url_for('user_profile', username=post_data.post.user.username) }}" class="username">
+                    {{ post_data.post.user.username }}
+                </a>
+                <span class="timestamp">{{ post_data.post.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+            </div>
+            <div class="post-body">{{ post_data.post.body }}</div>
+            <div class="post-actions">
+                {% if user and user.is_authenticated %}
+                    <a href="{{ url_for('like', post_id=post_data.post.id) }}">❤️ {{ post_data.likes }} Likes</a>
+                {% else %}
+                    <span>❤️ {{ post_data.likes }} Likes</span>
+                {% endif %}
+                <span>💬 {{ post_data.comments|length }} Comments</span>
+            </div>
         </div>
         {% endfor %}
+    {% else %}
+    <div class="empty">
+        <h3>No posts yet</h3>
+        <p>Be the first to post something awesome!</p>
     </div>
+    {% endif %}
 </body>
 </html>
-<img src="/static/uploads/photo1.jpg">
