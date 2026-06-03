@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block title %}{{ profile_user.username }} - OnlyOGs{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2>{{ profile_user.username }}'s Profile</h2>
+    <p style="color: #999; margin-bottom: 0;">{{ posts|length }} posts</p>
+</div>
+
+{% if posts %}
+    {% for post_data in posts %}
+    <div class="post">
+        <div class="post-header">
+            <span style="font-weight: 600;">{{ profile_user.username }}</span>
+            <span class="post-time">{{ post_data.post.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+        </div>
+        <div class="post-body">{{ post_data.post.body }}</div>
+        <div class="post-actions">
+            {% if user and user.is_authenticated %}
+                <form method="GET" action="{{ url_for('like', post_id=post_data.post.id) }}" style="margin: 0;">
+                    <button class="like-btn" type="submit">👍 Like ({{ post_data.likes }})</button>
+                </form>
+            {% else %}
+                <span style="color: #999;">👍 {{ post_data.likes }}</span>
+            {% endif %}
+            <span style="color: #999;">💬 {{ post_data.comments|length }}</span>
+        </div>
+        
+        {% if post_data.comments %}
+        <div class="comments">
+            <h4 style="margin-bottom: 1rem;">Comments</h4>
+            {% for comment in post_data.comments %}
+            <div class="comment">
+                <span class="comment-author">{{ comment.user.username }}</span>
+                <span class="comment-time">{{ comment.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+                <div class="comment-body">{{ comment.body }}</div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        
+        {% if user and user.is_authenticated %}
+        <form method="POST" action="{{ url_for('comment', post_id=post_data.post.id) }}" class="comment-form">
+            <input type="text" name="body" placeholder="Add a comment..." required>
+            <button type="submit">Comment</button>
+        </form>
+        {% endif %}
+    </div>
+    {% endfor %}
+{% else %}
+<div class="card" style="text-align: center; padding: 3rem 1.5rem;">
+    <p style="color: #999;">No posts yet.</p>
+</div>
+{% endif %}
+{% endblock %}
