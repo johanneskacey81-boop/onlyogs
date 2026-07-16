@@ -1,25 +1,16 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Create Post - OnlyOGs</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>Create Post – OnlyOGS</title>
 </head>
 <body>
-    <div class="header">
-        <h1>🔥 OnlyOGs</h1>
-    </div>
+    <h2>Create a Post</h2>
 
-    <div class="form-container">
-        <h1>Create Post</h1>
-        <form method="POST">
-            <textarea name="body" placeholder="What's on your mind?" required></textarea>
-            <button type="submit">📝 Post</button>
-            <div class="form-footer">
-                <a href="{{ url_for('feed') }}">← Back to Feed</a>
-            </div>
-        </form>
-    </div>
+    <form method="POST">
+        <textarea name="body" placeholder="What's on your mind?" required></textarea><br><br>
+        <button type="submit">Post</button>
+    </form>
+
+    <p><a href="/feed">Back to Feed</a></p>
 </body>
 </html>
