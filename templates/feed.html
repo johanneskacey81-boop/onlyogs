@@ -1,59 +1,35 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OnlyOGs - Only The Real Ones</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>Feed – OnlyOGS</title>
 </head>
 <body>
-    <div class="header">
-        <h1>🔥 OnlyOGs</h1>
-        <div class="auth-buttons">
-            {% if user and user.is_authenticated %}
-                <span>Welcome, <a href="{{ url_for('user_profile', username=user.username) }}" class="username">{{ user.username }}</a></span>
-                <a href="{{ url_for('logout') }}"><button>Logout</button></a>
-            {% else %}
-                <a href="{{ url_for('login') }}"><button>Login</button></a>
-                <a href="{{ url_for('signup') }}"><button class="btn-primary">Sign Up</button></a>
-            {% endif %}
-        </div>
-    </div>
+    <h2>OnlyOGS Feed</h2>
 
-    <div class="content">
-        {% if user and user.is_authenticated %}
-            <div class="create-btn">
-                <a href="{{ url_for('create_post') }}"><button>What's on your mind, OG?</button></a>
-            </div>
-        {% endif %}
+    <p>Welcome, {{ user.username }}!</p>
 
-        {% if posts %}
-            {% for post_data in posts %}
-            <div class="post">
-                <div class="post-header">
-                    <a href="{{ url_for('user_profile', username=post_data.post.user.username) }}" class="username">{{ post_data.post.user.username }}</a>
-                    <span class="og-badge">OG</span>
-                    <span class="timestamp">{{ post_data.post.created_at.strftime('%b %d') }}</span>
-                </div>
-                <div class="post-body">{{ post_data.post.body }}</div>
-                <div class="post-actions">
-                    {% if user and user.is_authenticated %}
-                        <a href="{{ url_for('like', post_id=post_data.post.id) }}">Like {{ post_data.likes }}</a>
-                    {% else %}
-                        <span>Like {{ post_data.likes }}</span>
-                    {% endif %}
-                    <span>Comments {{ post_data.comments|length }}</span>
-                </div>
+    <a href="/create_post">Create Post</a> |
+    <a href="/logout">Logout</a>
+
+    <hr>
+
+    {% if posts %}
+        {% for item in posts %}
+            <div style="border:1px solid #ccc; padding:10px; margin-bottom:10px;">
+                <strong>@{{ item.post.user.username }}</strong><br>
+                <p>{{ item.post.body }}</p>
+                <small>{{ item.post.created_at.strftime('%Y-%m-%d %H:%M') }}</small><br>
+
+                <a href="/like/{{ item.post.id }}">❤️ {{ item.likes }}</a>
+
+                <h4>Comments:</h4>
+                {% for c in item.comments %}
+                    <p><strong>@{{ c.user.username }}</strong>: {{ c.body }}</p>
+                {% endfor %}
             </div>
-            {% endfor %}
-        {% else %}
-            <div class="empty">
-                <span class="empty-lock">🔒</span>
-                <h3>The feed is quiet for now.</h3>
-                <p>This is a private space for real ones only. Sign up to be among the first OGs.</p>
-                <span class="empty-badge">Founding OG Access</span>
-            </div>
-        {% endif %}
-    </div>
+        {% endfor %}
+    {% else %}
+        <p>No posts yet. Be the first OG to post.</p>
+    {% endif %}
 </body>
 </html>
