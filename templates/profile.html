@@ -1,75 +1,16 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Profile - OnlyOGs</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>Create Post – OnlyOGS</title>
 </head>
 <body>
-    <div class="header">
-        <h1>🔥 OnlyOGs</h1>
-        <div class="auth-buttons">
-            {% if user and user.is_authenticated %}
-                <span>Welcome, <a href="{{ url_for('user_profile', username=user.username) }}" class="username">{{ user.username }}</a></span>
-                <a href="{{ url_for('logout') }}"><button>Logout</button></a>
-            {% else %}
-                <a href="{{ url_for('login') }}"><button>Login</button></a>
-            {% endif %}
-        </div>
-    </div>
+    <h2>Create a Post</h2>
 
-    <div class="content">
-        <div class="profile-header">
-            <h2>{{ profile_user.username }}</h2>
-            <p style="color: #999; margin: 5px 0;">{{ posts|length }} posts</p>
-        </div>
+    <form method="POST">
+        <textarea name="body" placeholder="What's on your mind?" required></textarea><br><br>
+        <button type="submit">Post</button>
+    </form>
 
-        {% if posts %}
-            {% for post_data in posts %}
-            <div class="post">
-                <div class="post-header">
-                    <a href="{{ url_for('user_profile', username=post_data.post.user.username) }}" class="username">
-                        {{ post_data.post.user.username }}
-                    </a>
-                    <span class="timestamp">{{ post_data.post.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
-                </div>
-                <div class="post-body">{{ post_data.post.body }}</div>
-                <div class="post-actions">
-                    {% if user and user.is_authenticated %}
-                        <a href="{{ url_for('like', post_id=post_data.post.id) }}">❤️ {{ post_data.likes }} Likes</a>
-                    {% else %}
-                        <span>❤️ {{ post_data.likes }} Likes</span>
-                    {% endif %}
-                    <span>💬 {{ post_data.comments|length }} Comments</span>
-                </div>
-
-                {% if post_data.comments %}
-                <div class="comments" style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #eee;">
-                    {% for comment in post_data.comments %}
-                    <div class="comment" style="margin: 10px 0; padding: 10px; background: #f9f9f9; border-radius: 5px;">
-                        <span class="comment-author" style="font-weight: 600;">{{ comment.user.username }}</span>
-                        <span style="color: #999; font-size: 0.85em; margin-left: 10px;">{{ comment.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
-                        <div class="comment-body" style="margin-top: 5px; color: #666;">{{ comment.body }}</div>
-                    </div>
-                    {% endfor %}
-                </div>
-                {% endif %}
-
-                {% if user and user.is_authenticated %}
-                <form method="POST" action="{{ url_for('comment', post_id=post_data.post.id) }}" style="margin-top: 15px;">
-                    <input type="text" name="body" placeholder="Add a comment..." required style="padding: 8px; width: 100%; margin: 0;">
-                    <button type="submit" style="width: 100%; margin-top: 8px; padding: 10px;">Comment</button>
-                </form>
-                {% endif %}
-            </div>
-            {% endfor %}
-        {% else %}
-        <div class="empty">
-            <h3>No posts yet</h3>
-            <p>This user hasn't posted anything yet.</p>
-        </div>
-        {% endif %}
-    </div>
+    <p><a href="/feed">Back to Feed</a></p>
 </body>
 </html>
