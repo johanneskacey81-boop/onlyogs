@@ -1,50 +1,41 @@
-from flask import Flask, render_template, request, redirect, url_for
-from flask_sqlalchemy import SQLAlchemy
-from flask_login import (
-    LoginManager, UserMixin,
-    login_user, logout_user, login_required, current_user
-)
-from werkzeug.security import generate_password_hash, check_password_hash
 import os
 from datetime import datetime
+from flask import Flask, render_template, redirect, request, url_for
+from flask_sqlalchemy import SQLAlchemy
+from flask_login import (
+    LoginManager, UserMixin, login_user,
+    login_required, logout_user, current_user
+)
+from werkzeug.security import generate_password_hash, check_password_hash
 
-# -------------------------
-# App + DB setup
-# -------------------------
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "super-secret-change-me"
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///onlyogs.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db = SQLAlchemy(app)
-
-# -------------------------
-# Login manager
-# -------------------------
-login_manager = LoginManager()
-login_manager.init_app(app)
+login_manager = LoginManager(app)
 login_manager.login_view = "login"
 
 # -------------------------
-# Models
+# MODELS
 # -------------------------
+
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(200), nullable=False)
+    posts = db.relationship("Post", backref="user", lazy=True)
+    comments = db.relationship("Comment", backref="user", lazy=True)
 
 class Post(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     body = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
-    user = db.relationship("User", backref="posts")
-
-class Like(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
-    post_id = db.Column(db.Integer, db.ForeignKey("post.id"))
+    comments = db.relationship("Comment", backref="post", lazy=True)
+    likes = db.relationship("Like", backref="post", lazy=True)
 
 class Comment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -52,17 +43,22 @@ class Comment(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
     post_id = db.Column(db.Integer, db.ForeignKey("post.id"))
-    user = db.relationship("User", backref="comments")
+
+class Like(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
+    post_id = db.Column(db.Integer, db.ForeignKey("post.id"))
+
+# -------------------------
+# LOGIN MANAGER
+# -------------------------
 
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
 
-# -------------------------
-# DB + default admin
-# -------------------------
+# Create admin if missing
 with app.app_context():
-    db.create_all()
     if not User.query.filter_by(username="admin").first():
         admin = User(
             username="admin",
@@ -71,43 +67,19 @@ with app.app_context():
         )
         db.session.add(admin)
         db.session.commit()
-        print("Default admin created: admin / admin123")
 
 # -------------------------
-# Helpers
+# ROOT ROUTE
 # -------------------------
-def post_like_count(post_id):
-    return Like.query.filter_by(post_id=post_id).count()
 
-def post_comments(post_id):
-    return Comment.query.filter_by(post_id=post_id).order_by(Comment.created_at.asc()).all()
-
-# -------------------------
-# PUBLIC routes
-# -------------------------
 @app.route("/")
-def home():
+def index():
     return redirect("/feed")
 
-@app.route("/feed")
-def feed():
-    posts = Post.query.order_by(Post.created_at.desc()).all()
-    data = []
-    for p in posts:
-        data.append({
-            "post": p,
-            "likes": post_like_count(p.id),
-            "comments": post_comments(p.id)
-        })
-    return render_template(
-        "feed.html",
-        posts=data,
-        user=current_user if current_user.is_authenticated else None
-    )
+# -------------------------
+# AUTH ROUTES
+# -------------------------
 
-# -------------------------
-# Auth routes
-# -------------------------
 @app.route("/signup", methods=["GET", "POST"])
 def signup():
     if request.method == "POST":
@@ -117,7 +89,7 @@ def signup():
 
         if User.query.filter_by(username=username).first():
             return render_template("signup.html", error="Username already taken")
-        
+
         if User.query.filter_by(email=email).first():
             return render_template("signup.html", error="Email already registered")
 
@@ -127,9 +99,10 @@ def signup():
         db.session.commit()
 
         login_user(new_user)
-        return redirect(url_for("feed"))
+        return redirect("/feed")
 
     return render_template("signup.html")
+
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -138,25 +111,44 @@ def login():
         password = request.form.get("password")
 
         user = User.query.filter_by(username=username).first()
-
-        if user and check_password_hash(user.password, password):
-            login_user(user)
-            next_page = request.args.get("next") or url_for("feed")
-            return redirect(next_page)
-        else:
+        if not user or not check_password_hash(user.password, password):
             return render_template("login.html", error="Invalid username or password")
 
+        login_user(user)
+        return redirect("/feed")
+
     return render_template("login.html")
+
 
 @app.route("/logout")
 @login_required
 def logout():
     logout_user()
-    return redirect(url_for("home"))
+    return redirect("/login")
 
 # -------------------------
-# Posting
+# FEED
 # -------------------------
+
+@app.route("/feed")
+@login_required
+def feed():
+    posts = Post.query.order_by(Post.created_at.desc()).all()
+
+    formatted_posts = []
+    for post in posts:
+        formatted_posts.append({
+            "post": post,
+            "likes": len(post.likes),
+            "comments": post.comments
+        })
+
+    return render_template("feed.html", posts=formatted_posts, user=current_user)
+
+# -------------------------
+# CREATE POST
+# -------------------------
+
 @app.route("/create_post", methods=["GET", "POST"])
 @login_required
 def create_post():
@@ -166,60 +158,42 @@ def create_post():
             post = Post(body=body, user_id=current_user.id)
             db.session.add(post)
             db.session.commit()
-        return redirect(url_for("feed"))
-    
+            return redirect("/feed")
+
     return render_template("create_post.html")
 
 # -------------------------
-# Likes
+# LIKE POST
 # -------------------------
+
 @app.route("/like/<int:post_id>")
 @login_required
 def like(post_id):
-    existing = Like.query.filter_by(user_id=current_user.id, post_id=post_id).first()
-    if not existing:
+    existing_like = Like.query.filter_by(
+        user_id=current_user.id, post_id=post_id
+    ).first()
+
+    if not existing_like:
         like = Like(user_id=current_user.id, post_id=post_id)
         db.session.add(like)
         db.session.commit()
-    return redirect(request.referrer or url_for("feed"))
+
+    return redirect("/feed")
 
 # -------------------------
-# Comments
+# USER PROFILE
 # -------------------------
-@app.route("/comment/<int:post_id>", methods=["POST"])
-@login_required
-def comment(post_id):
-    body = request.form.get("body")
-    if body:
-        c = Comment(body=body, user_id=current_user.id, post_id=post_id)
-        db.session.add(c)
-        db.session.commit()
-    return redirect(request.referrer or url_for("feed"))
 
-# -------------------------
-# Profiles
-# -------------------------
 @app.route("/user/<username>")
 def user_profile(username):
-    user_obj = User.query.filter_by(username=username).first_or_404()
-    posts = Post.query.filter_by(user_id=user_obj.id).order_by(Post.created_at.desc()).all()
-    data = []
-    for p in posts:
-        data.append({
-            "post": p,
-            "likes": post_like_count(p.id),
-            "comments": post_comments(p.id)
-        })
-    return render_template(
-        "profile.html",
-        profile_user=user_obj,
-        posts=data,
-        user=current_user if current_user.is_authenticated else None
-    )
+    user = User.query.filter_by(username=username).first_or_404()
+    posts = Post.query.filter_by(user_id=user.id).order_by(Post.created_at.desc()).all()
+    return render_template("profile.html", user=user, posts=posts)
 
 # -------------------------
-# Run (Render compatible)
+# RUN APP
 # -------------------------
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port, debug=False)
