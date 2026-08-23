@@ -1,35 +1,53 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Feed – OnlyOGS</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <h2>OnlyOGS Feed</h2>
+    <div class="header">
+        <h1>🔥 OnlyOGs</h1>
+        <div class="auth-buttons">
+            <span>Welcome, {{ user.username }}!</span>
+            <a href="/create_post"><button>+ Create Post</button></a>
+            <a href="/logout"><button>Logout</button></a>
+        </div>
+    </div>
 
-    <p>Welcome, {{ user.username }}!</p>
-
-    <a href="/create_post">Create Post</a> |
-    <a href="/logout">Logout</a>
-
-    <hr>
-
-    {% if posts %}
-        {% for item in posts %}
-            <div style="border:1px solid #ccc; padding:10px; margin-bottom:10px;">
-                <strong>@{{ item.post.user.username }}</strong><br>
-                <p>{{ item.post.body }}</p>
-                <small>{{ item.post.created_at.strftime('%Y-%m-%d %H:%M') }}</small><br>
-
-                <a href="/like/{{ item.post.id }}">❤️ {{ item.likes }}</a>
-
-                <h4>Comments:</h4>
-                {% for c in item.comments %}
-                    <p><strong>@{{ c.user.username }}</strong>: {{ c.body }}</p>
-                {% endfor %}
+    <div class="content">
+        {% if posts %}
+            {% for item in posts %}
+                <div class="post">
+                    <div class="post-header">
+                        <a href="/user/{{ item.post.user.username }}" class="username">@{{ item.post.user.username }}</a>
+                        <span class="timestamp">{{ item.post.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+                    </div>
+                    <div class="post-body">{{ item.post.body }}</div>
+                    <div class="post-actions">
+                        <a href="/like/{{ item.post.id }}">❤️ {{ item.likes }} Likes</a>
+                        <span>💬 {{ item.comments|length }} Comments</span>
+                    </div>
+                    {% if item.comments %}
+                        <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border);">
+                            {% for c in item.comments %}
+                                <p style="font-size: 13px; color: var(--text-secondary); margin: 6px 0;">
+                                    <strong>@{{ c.user.username }}</strong>: {{ c.body }}
+                                </p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty">
+                <span class="empty-lock">🔒</span>
+                <h3>No Posts Yet</h3>
+                <p>Be the first OG to post something exclusive</p>
+                <div class="empty-badge">Coming Soon</div>
             </div>
-        {% endfor %}
-    {% else %}
-        <p>No posts yet. Be the first OG to post.</p>
-    {% endif %}
+        {% endif %}
+    </div>
 </body>
 </html>
