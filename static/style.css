@@ -48,49 +48,122 @@ body::before {
    HEADER
    =========================== */
 
-header {
+.header {
   background: rgba(10, 0, 20, 0.95);
   border-bottom: 2px solid #ff006e;
-  padding: 1rem 2rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  padding: 1.5rem 2rem;
   box-shadow: 0 0 20px rgba(255, 0, 110, 0.3);
 }
 
-.header-left {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 1.5rem;
-  font-weight: bold;
+.header h1 {
   color: #ff006e;
+  font-size: 1.8rem;
   text-shadow: 0 0 10px #ff006e, 0 0 20px rgba(255, 0, 110, 0.5);
+  letter-spacing: 1px;
 }
 
-.header-right {
+/* ===========================
+   FORM CONTAINER
+   =========================== */
+
+.form-container {
   display: flex;
-  gap: 1.5rem;
+  flex-direction: column;
+  justify-content: center;
   align-items: center;
+  min-height: calc(100vh - 100px);
+  padding: 2rem;
+  max-width: 500px;
+  margin: 0 auto;
 }
 
-.welcome-text {
-  color: #00d9ff;
-  font-size: 0.9rem;
-  text-shadow: 0 0 10px #00d9ff;
+.form-container h1 {
+  color: #ff006e;
+  font-size: 2.5rem;
+  margin-bottom: 2rem;
+  text-shadow: 0 0 20px #ff006e, 0 0 40px rgba(255, 0, 110, 0.3);
+  letter-spacing: 2px;
+  text-align: center;
+}
+
+.form-container h1::before {
+  content: '👑 ';
+  display: block;
+  font-size: 3rem;
+  margin-bottom: 0.5rem;
+}
+
+/* ===========================
+   FORM
+   =========================== */
+
+form {
+  width: 100%;
+  background: rgba(20, 5, 30, 0.95);
+  border: 2px solid #ff006e;
+  border-radius: 20px;
+  padding: 2rem;
+  box-shadow: 
+    0 0 20px rgba(255, 0, 110, 0.4),
+    0 0 40px rgba(0, 217, 255, 0.2),
+    inset 0 0 20px rgba(255, 0, 110, 0.05);
+  animation: glow 2s ease-in-out infinite;
+}
+
+@keyframes glow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(255, 0, 110, 0.4), 0 0 40px rgba(0, 217, 255, 0.2), inset 0 0 20px rgba(255, 0, 110, 0.05);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(255, 0, 110, 0.6), 0 0 60px rgba(0, 217, 255, 0.3), inset 0 0 20px rgba(255, 0, 110, 0.1);
+  }
+}
+
+/* ===========================
+   FORM INPUTS
+   =========================== */
+
+input[type="text"],
+input[type="email"],
+input[type="password"] {
+  width: 100%;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 2px solid #00d9ff;
+  border-radius: 10px;
+  color: #e0e0e0;
+  font-size: 1rem;
+  box-shadow: 0 0 10px rgba(0, 217, 255, 0.2), inset 0 0 10px rgba(0, 217, 255, 0.05);
+  transition: all 0.3s ease;
+}
+
+input[type="text"]::placeholder,
+input[type="email"]::placeholder,
+input[type="password"]::placeholder {
+  color: rgba(224, 224, 224, 0.5);
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus {
+  outline: none;
+  border-color: #ff006e;
+  box-shadow: 0 0 20px rgba(255, 0, 110, 0.5), inset 0 0 10px rgba(255, 0, 110, 0.1);
 }
 
 /* ===========================
    BUTTONS
    =========================== */
 
-button, .btn, input[type="submit"] {
+button, input[type="submit"] {
+  width: 100%;
   background: linear-gradient(135deg, #ff006e 0%, #ff6b35 100%);
   color: white;
   border: none;
-  padding: 0.8rem 2rem;
+  padding: 1rem;
   border-radius: 50px;
-  font-size: 1rem;
+  font-size: 1.1rem;
   font-weight: bold;
   cursor: pointer;
   box-shadow: 0 0 15px rgba(255, 0, 110, 0.5);
@@ -99,12 +172,12 @@ button, .btn, input[type="submit"] {
   letter-spacing: 1px;
 }
 
-button:hover, .btn:hover, input[type="submit"]:hover {
+button:hover, input[type="submit"]:hover {
   box-shadow: 0 0 30px rgba(255, 0, 110, 0.8), 0 0 60px rgba(255, 107, 53, 0.5);
   transform: translateY(-2px);
 }
 
-button:active {
+button:active, input[type="submit"]:active {
   transform: translateY(0);
 }
 
@@ -116,3 +189,136 @@ button:active {
 }
 
 .btn-outline:hover {
+  background: rgba(0, 217, 255, 0.1);
+  box-shadow: 0 0 20px rgba(0, 217, 255, 0.6);
+}
+
+/* ===========================
+   ERROR MESSAGES
+   =========================== */
+
+.error {
+  color: #ff006e;
+  text-align: center;
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: rgba(255, 0, 110, 0.1);
+  border: 2px solid #ff006e;
+  border-radius: 10px;
+  text-shadow: 0 0 5px #ff006e;
+  width: 100%;
+}
+
+/* ===========================
+   FORM FOOTER
+   =========================== */
+
+.form-footer {
+  text-align: center;
+  margin-top: 1.5rem;
+  color: #b0b0b0;
+  font-size: 0.9rem;
+}
+
+.form-footer a {
+  color: #ff006e;
+  text-decoration: none;
+  font-weight: bold;
+  text-shadow: 0 0 5px #ff006e;
+  transition: all 0.3s ease;
+}
+
+.form-footer a:hover {
+  text-shadow: 0 0 15px #ff006e;
+  color: #ff3380;
+}
+
+/* ===========================
+   FEED / DASHBOARD
+   =========================== */
+
+.feed-container {
+  max-width: 900px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+
+.feed-empty {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: #b0b0b0;
+}
+
+.feed-empty-icon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+  filter: drop-shadow(0 0 10px #ff006e);
+}
+
+.feed-empty h2 {
+  color: #e0e0e0;
+  margin-bottom: 0.5rem;
+  text-shadow: 0 0 10px #ff006e;
+}
+
+.coming-soon {
+  display: inline-block;
+  color: #ff006e;
+  border: 2px solid #ff006e;
+  padding: 0.5rem 1.5rem;
+  border-radius: 20px;
+  margin-top: 1.5rem;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  letter-spacing: 1px;
+  box-shadow: 0 0 10px rgba(255, 0, 110, 0.3);
+}
+
+/* ===========================
+   RESPONSIVENESS
+   =========================== */
+
+@media (max-width: 768px) {
+  .header h1 {
+    font-size: 1.5rem;
+  }
+
+  .form-container h1 {
+    font-size: 2rem;
+  }
+
+  form {
+    padding: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .header {
+    padding: 1rem;
+  }
+
+  .form-container {
+    padding: 1rem;
+  }
+
+  .form-container h1 {
+    font-size: 1.8rem;
+  }
+
+  form {
+    padding: 1.5rem;
+    border-radius: 15px;
+  }
+
+  input[type="text"],
+  input[type="email"],
+  input[type="password"] {
+    padding: 0.8rem;
+    margin-bottom: 1rem;
+  }
+
+  button, input[type="submit"] {
+    padding: 0.8rem;
+    font-size: 1rem;
+  }
+}
