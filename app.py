@@ -366,4 +366,27 @@ def delete_ghost_message(message_id):
         db.session.delete(msg)
         db.session.commit()
     return redirect(url_for("ghost_messages"))
+# ===========================
+# VOICE LOUNGE MODELS
+# ===========================
 
+class VoiceLounge(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(120), nullable=False)
+    creator_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    is_active = db.Column(db.Boolean, default=True)
+    description = db.Column(db.Text, nullable=True)
+    
+    creator = db.relationship("User", backref="created_lounges")
+    participants = db.relationship("VoiceLoungeParticipant", backref="lounge", cascade="all, delete-orphan")
+
+
+class VoiceLoungeParticipant(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    lounge_id = db.Column(db.Integer, db.ForeignKey("voice_lounge.id"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+    joined_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    is_speaking = db.Column(db.Boolean, default=False)
+    
+    user = db.relationship("User", backref="voice_lounge_participations")
