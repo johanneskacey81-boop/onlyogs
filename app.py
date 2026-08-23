@@ -75,7 +75,7 @@ with app.app_context():
 
 @app.route("/")
 def index():
-    return redirect("/feed")
+   return render_template("login.html")
 
 # -------------------------
 # AUTH ROUTES
@@ -130,7 +130,7 @@ def logout():
 # -------------------------
 # FEED
 # -------------------------
-
+@login_required
 @app.route("/feed")
 @login_required
 def feed():
