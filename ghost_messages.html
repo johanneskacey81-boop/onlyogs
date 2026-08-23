@@ -1,0 +1,65 @@
+ghost_messages.html    
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ghost Mode - OnlyOGs</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header class="feed-header">
+        <div class="header-left">
+            <h1>👻 OnlyOGs - Ghost Mode</h1>
+        </div>
+        <div class="header-right">
+            <a href="{{ url_for('logout') }}" class="logout-btn">Logout</a>
+        </div>
+    </header>
+
+    <div style="max-width: 600px; margin: 2rem auto; padding: 1rem;">
+        <h2 style="color: #ff006e; text-shadow: 0 0 10px #ff006e;">Send Ghost Message</h2>
+        <form method="POST" action="{{ url_for('send_ghost_message') }}" style="background: rgba(20, 5, 30, 0.95); border: 2px solid #ff006e; padding: 2rem; border-radius: 15px; margin-bottom: 2rem;">
+            <input type="text" name="recipient" placeholder="Recipient username" required style="width: 100%; padding: 0.8rem; margin-bottom: 1rem; background: rgba(255,255,255,0.05); border: 2px solid #00d9ff; border-radius: 10px; color: #e0e0e0;">
+            <textarea name="content" placeholder="Your message (will self-destruct)" required style="width: 100%; padding: 0.8rem; margin-bottom: 1rem; background: rgba(255,255,255,0.05); border: 2px solid #00d9ff; border-radius: 10px; color: #e0e0e0; min-height: 100px;"></textarea>
+            <select name="ttl" style="width: 100%; padding: 0.8rem; margin-bottom: 1rem; background: rgba(255,255,255,0.05); border: 2px solid #00d9ff; border-radius: 10px; color: #e0e0e0;">
+                <option value="10">10 seconds</option>
+                <option value="30" selected>30 seconds</option>
+                <option value="60">1 minute</option>
+                <option value="300">5 minutes</option>
+            </select>
+            <button type="submit" style="width: 100%; background: linear-gradient(135deg, #ff006e 0%, #ff6b35 100%); color: white; border: none; padding: 1rem; border-radius: 20px; font-weight: bold; cursor: pointer; box-shadow: 0 0 15px rgba(255, 0, 110, 0.5);">Send Ghost Message</button>
+        </form>
+
+        <h2 style="color: #ff006e; text-shadow: 0 0 10px #ff006e;">Received Ghost Messages</h2>
+        {% if messages %}
+            {% for msg in messages %}
+            <div style="border: 2px solid #ff006e; padding: 1.5rem; margin: 1rem 0; border-radius: 15px; background: rgba(20, 5, 30, 0.95);">
+                <p style="color: #00d9ff;"><strong>From:</strong> {{ msg.sender.username }}</p>
+                <p style="color: #b0b0b0;"><strong>Expires in:</strong> <span id="timer-{{ msg.id }}">calculating...</span> seconds</p>
+                <a href="{{ url_for('view_ghost_message', message_id=msg.id) }}" style="color: #ff006e; text-decoration: none; font-weight: bold;">👁️ View Message</a>
+                <form method="POST" action="{{ url_for('delete_ghost_message', message_id=msg.id) }}" style="display:inline; margin-left: 1rem;">
+                    <button type="submit" style="background: #ff006e; color: white; border: none; padding: 0.5rem 1rem; border-radius: 10px; cursor: pointer;">Delete</button>
+                </form>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p style="color: #b0b0b0; text-align: center;">No ghost messages yet.</p>
+        {% endif %}
+    </div>
+
+    <script>
+        // Update timers
+        function updateTimers() {
+            {% for msg in messages %}
+            const expiresAt = new Date('{{ msg.expires_at }}');
+            const now = new Date();
+            const secondsLeft = Math.max(0, Math.floor((expiresAt - now) / 1000));
+            document.getElementById('timer-{{ msg.id }}').textContent = secondsLeft;
+            {% endfor %}
+        }
+        setInterval(updateTimers, 1000);
+        updateTimers();
+    </script>
+</body>
+</html>
