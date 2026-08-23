@@ -199,7 +199,78 @@ def initdb():
     db.create_all()
     return "Database initialized!"
 
+# ===========================
+# GHOST MODE ROUTES
+# ===========================
 
+@app.route("/send-ghost-message", methods=["POST"])
+@login_required
+def send_ghost_message():
+    recipient_username = request.form.get("recipient")
+    content = request.form.get("content")
+    ttl_seconds = int(request.form.get("ttl", 30))
+    
+    recipient = User.query.filter_by(username=recipient_username).first()
+    if not recipient:
+        return redirect(url_for("feed"))
+    
+    expires_at = datetime.utcnow() + datetime.timedelta(seconds=ttl_seconds)
+    
+    ghost_msg = GhostMessage(
+        sender_id=current_user.id,
+        recipient_id=recipient.id,
+        content=content,
+        expires_at=expires_at
+    )
+    
+    db.session.add(ghost_msg)
+    db.session.commit()
+    
+    return redirect(url_for("feed"))
+
+
+@app.route("/ghost-messages")
+@login_required
+def ghost_messages():
+    now = datetime.utcnow()
+    messages = GhostMessage.query.filter(
+        (GhostMessage.recipient_id == current_user.id) &
+        (GhostMessage.expires_at > now)
+    ).all()
+    
+    expired = GhostMessage.query.filter(GhostMessage.expires_at <= now).delete()
+    db.session.commit()
+    
+    return render_template("ghost_messages.html", messages=messages)
+
+
+@app.route("/view-ghost-message/<int:message_id>")
+@login_required
+def view_ghost_message(message_id):
+    msg = GhostMessage.query.get(message_id)
+    
+    if not msg or msg.recipient_id != current_user.id:
+        return redirect(url_for("feed"))
+    
+    if datetime.utcnow() > msg.expires_at:
+        db.session.delete(msg)
+        db.session.commit()
+        return "Message expired!"
+    
+    msg.is_viewed = True
+    db.session.commit()
+    
+    return render_template("view_ghost_message.html", message=msg)
+
+
+@app.route("/delete-ghost-message/<int:message_id>", methods=["POST"])
+@login_required
+def delete_ghost_message(message_id):
+    msg = GhostMessage.query.get(message_id)
+    if msg and msg.recipient_id == current_user.id:
+        db.session.delete(msg)
+        db.session.commit()
+    return redirect(url_for("ghost_messages"))
 # ===========================
 # GHOST MODE MODEL
 # ===========================
