@@ -289,6 +289,95 @@ def delete_ghost_message(message_id):
         db.session.delete(msg)
         db.session.commit()
     return redirect(url_for("ghost_messages"))
+# ===========================
+# GHOST MODE MODEL
+# ===========================
+
+class GhostMessage(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    sender_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    recipient_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    content = db.Column(db.Text, nullable=False)
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.datetime.utcnow)
+    expires_at = db.Column(db.DateTime, nullable=False)
+    is_viewed = db.Column(db.Boolean, default=False)
+    
+    sender = db.relationship('User', foreign_keys=[sender_id], backref='sent_ghost_messages')
+    recipient = db.relationship('User', foreign_keys=[recipient_id], backref='received_ghost_messages')
+
+
+# ===========================
+# GHOST MODE ROUTES
+# ===========================
+
+@app.route("/send-ghost-message", methods=["POST"])
+@login_required
+def send_ghost_message():
+    recipient_username = request.form.get("recipient")
+    content = request.form.get("content")
+    ttl_seconds = int(request.form.get("ttl", 30))
+    
+    recipient = User.query.filter_by(username=recipient_username).first()
+    if not recipient:
+        return redirect(url_for("feed"))
+    
+    expires_at = datetime.datetime.utcnow() + datetime.timedelta(seconds=ttl_seconds)
+    
+    ghost_msg = GhostMessage(
+        sender_id=current_user.id,
+        recipient_id=recipient.id,
+        content=content,
+        expires_at=expires_at
+    )
+    
+    db.session.add(ghost_msg)
+    db.session.commit()
+    
+    return redirect(url_for("feed"))
+
+
+@app.route("/ghost-messages")
+@login_required
+def ghost_messages():
+    now = datetime.datetime.utcnow()
+    messages = GhostMessage.query.filter(
+        (GhostMessage.recipient_id == current_user.id) &
+        (GhostMessage.expires_at > now)
+    ).all()
+    
+    expired = GhostMessage.query.filter(GhostMessage.expires_at <= now).delete()
+    db.session.commit()
+    
+    return render_template("ghost_messages.html", messages=messages)
+
+
+@app.route("/view-ghost-message/<int:message_id>")
+@login_required
+def view_ghost_message(message_id):
+    msg = GhostMessage.query.get(message_id)
+    
+    if not msg or msg.recipient_id != current_user.id:
+        return redirect(url_for("feed"))
+    
+    if datetime.datetime.utcnow() > msg.expires_at:
+        db.session.delete(msg)
+        db.session.commit()
+        return "Message expired!"
+    
+    msg.is_viewed = True
+    db.session.commit()
+    
+    return render_template("view_ghost_message.html", message=msg)
+
+
+@app.route("/delete-ghost-message/<int:message_id>", methods=["POST"])
+@login_required
+def delete_ghost_message(message_id):
+    msg = GhostMessage.query.get(message_id)
+    if msg and msg.recipient_id == current_user.id:
+        db.session.delete(msg)
+        db.session.commit()
+    return redirect(url_for("ghost_messages"))
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port, debug=False)
