@@ -59,6 +59,7 @@ def load_user(user_id):
 
 # Create admin if missing
 with app.app_context():
+    db.create_all()
     if not User.query.filter_by(username="admin").first():
         admin = User(
             username="admin",
