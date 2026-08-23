@@ -1,5 +1,5 @@
 /* ========================================
-   OnlyOGS - Premium Dark Theme
+   OnlyOGS - Premium Dark Theme (Pink/Magenta)
    ======================================== */
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
@@ -9,14 +9,14 @@
      --bg-secondary: #111111;
      --bg-card: #161616;
      --bg-hover: #1e1e1e;
-     --gold: #C9A84C;
-     --gold-light: #E8C96A;
-     --gold-dark: #A07830;
+     --pink: #FF1493;
+     --pink-light: #FF69B4;
+     --pink-dark: #C71585;
      --text-primary: #F5F5F5;
      --text-secondary: #A0A0A0;
      --text-muted: #555555;
      --border: #222222;
-     --border-gold: rgba(201, 168, 76, 0.3);
+     --border-pink: rgba(255, 20, 147, 0.3);
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -25,8 +25,8 @@ body {
      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
      background-color: var(--bg-primary);
      background-image:
-            radial-gradient(ellipse at 20% 0%, rgba(201,168,76,0.06) 0%, transparent 50%),
-            radial-gradient(ellipse at 80% 100%, rgba(201,168,76,0.04) 0%, transparent 50%);
+            radial-gradient(ellipse at 20% 0%, rgba(255, 20, 147, 0.06) 0%, transparent 50%),
+            radial-gradient(ellipse at 80% 100%, rgba(255, 20, 147, 0.04) 0%, transparent 50%);
      min-height: 100vh;
      color: var(--text-primary);
      padding: 0;
@@ -35,7 +35,7 @@ body {
 .header {
      background: rgba(8,8,8,0.95);
      backdrop-filter: blur(20px);
-     border-bottom: 1px solid var(--border-gold);
+     border-bottom: 1px solid var(--border-pink);
      padding: 0 24px;
      height: 64px;
      display: flex;
@@ -49,7 +49,7 @@ body {
 .header h1 {
      font-size: 22px;
      font-weight: 800;
-     color: var(--gold);
+     color: var(--pink);
      letter-spacing: -0.5px;
 }
 
@@ -57,13 +57,13 @@ body {
 .auth-buttons span { font-size: 14px; color: var(--text-secondary); }
 .auth-buttons a { text-decoration: none; }
 
-.username { color: var(--gold) !important; font-weight: 600; text-decoration: none !important; }
-.username:hover { color: var(--gold-light) !important; }
+.username { color: var(--pink) !important; font-weight: 600; text-decoration: none !important; }
+.username:hover { color: var(--pink-light) !important; }
 
 button {
      background: transparent;
-     color: var(--gold);
-     border: 1px solid var(--border-gold);
+     color: var(--pink);
+     border: 1px solid var(--border-pink);
      padding: 9px 20px;
      border-radius: 6px;
      cursor: pointer;
@@ -74,17 +74,17 @@ button {
 }
 
 button:hover {
-     background: var(--gold);
+     background: var(--pink);
      color: var(--bg-primary);
-     border-color: var(--gold);
+     border-color: var(--pink);
      transform: translateY(-1px);
-     box-shadow: 0 4px 20px rgba(201,168,76,0.3);
+     box-shadow: 0 4px 20px rgba(255, 20, 147, 0.3);
 }
 
-button.btn-primary { background: var(--gold); color: var(--bg-primary); border-color: var(--gold); }
+button.btn-primary { background: var(--pink); color: var(--bg-primary); border-color: var(--pink); }
 
-a { color: var(--gold); text-decoration: none; transition: color 0.2s ease; }
-a:hover { color: var(--gold-light); }
+a { color: var(--pink); text-decoration: none; transition: color 0.2s ease; }
+a:hover { color: var(--pink-light); }
 
 .content { max-width: 600px; margin: 0 auto; padding: 24px 16px; }
 .create-btn { margin-bottom: 24px; }
@@ -96,7 +96,7 @@ a:hover { color: var(--gold-light); }
 }
 
 .create-btn button:hover {
-     border-color: var(--border-gold); color: var(--text-primary);
+     border-color: var(--border-pink); color: var(--text-primary);
      background: var(--bg-hover); transform: none; box-shadow: none;
 }
 
@@ -110,13 +110,13 @@ a:hover { color: var(--gold-light); }
 }
 
 .post:hover {
-     border-color: var(--border-gold);
-     box-shadow: 0 0 20px rgba(201,168,76,0.05);
+     border-color: var(--border-pink);
+     box-shadow: 0 0 20px rgba(255, 20, 147, 0.05);
 }
 
 .post-header { display: flex; align-items: center; margin-bottom: 12px; gap: 10px; }
 .post-header .username { font-weight: 700; color: var(--text-primary) !important; font-size: 15px; }
-.post-header .username:hover { color: var(--gold) !important; }
+.post-header .username:hover { color: var(--pink) !important; }
 .timestamp { color: var(--text-muted); font-size: 12px; margin-left: auto; }
 
 .post-body { color: var(--text-primary); line-height: 1.65; margin: 12px 0; font-size: 15px; }
@@ -130,7 +130,7 @@ a:hover { color: var(--gold-light); }
      display: flex; align-items: center; gap: 5px;
      color: var(--text-muted); text-decoration: none !important; transition: color 0.2s ease;
 }
-.post-actions a:hover { color: var(--gold); }
+.post-actions a:hover { color: var(--pink); }
 
 .empty { text-align: center; padding: 80px 20px; }
 .empty-lock { font-size: 48px; margin-bottom: 20px; display: block; }
@@ -139,15 +139,15 @@ a:hover { color: var(--gold-light); }
 
 .empty-badge {
      display: inline-block; margin-top: 20px;
-     background: var(--bg-card); border: 1px solid var(--border-gold);
-     color: var(--gold); font-size: 12px; font-weight: 600;
+     background: var(--bg-card); border: 1px solid var(--border-pink);
+     color: var(--pink); font-size: 12px; font-weight: 600;
      letter-spacing: 1px; text-transform: uppercase; padding: 6px 16px; border-radius: 20px;
 }
 
 .og-badge {
      display: inline-flex; align-items: center;
-     background: rgba(201,168,76,0.1); border: 1px solid var(--border-gold);
-     color: var(--gold); font-size: 11px; font-weight: 700;
+     background: rgba(255, 20, 147, 0.1); border: 1px solid var(--border-pink);
+     color: var(--pink); font-size: 11px; font-weight: 700;
      letter-spacing: 1px; text-transform: uppercase; padding: 3px 8px; border-radius: 20px;
 }
 
@@ -157,7 +157,7 @@ a:hover { color: var(--gold-light); }
 }
 
 .form-logo { text-align: center; margin-bottom: 28px; }
-.form-logo h2 { font-size: 24px; font-weight: 800; color: var(--gold); }
+.form-logo h2 { font-size: 24px; font-weight: 800; color: var(--pink); }
 .form-logo p { font-size: 13px; color: var(--text-muted); margin-top: 4px; letter-spacing: 1px; text-transform: uppercase; }
 
 .form-container h1 { color: var(--text-primary); margin-bottom: 24px; font-size: 20px; font-weight: 700; }
@@ -177,8 +177,8 @@ input[type=text], input[type=email], input[type=password], textarea {
 }
 
 input:focus, textarea:focus {
-     outline: none; border-color: var(--gold);
-     box-shadow: 0 0 0 3px rgba(201,168,76,0.1);
+     outline: none; border-color: var(--pink);
+     box-shadow: 0 0 0 3px rgba(255, 20, 147, 0.1);
 }
 
 input::placeholder, textarea::placeholder { color: var(--text-muted); }
@@ -186,13 +186,13 @@ textarea { resize: vertical; min-height: 120px; }
 
 .form-container button {
      width: 100%; padding: 13px; margin-top: 4px; font-size: 14px;
-     background: var(--gold); color: var(--bg-primary);
-     border-color: var(--gold); font-weight: 700;
+     background: var(--pink); color: var(--bg-primary);
+     border-color: var(--pink); font-weight: 700;
 }
 
 .form-container button:hover {
-     background: var(--gold-light); border-color: var(--gold-light);
-     box-shadow: 0 4px 24px rgba(201,168,76,0.35); color: var(--bg-primary);
+     background: var(--pink-light); border-color: var(--pink-light);
+     box-shadow: 0 4px 24px rgba(255, 20, 147, 0.35); color: var(--bg-primary);
 }
 
 .error {
@@ -202,7 +202,7 @@ textarea { resize: vertical; min-height: 120px; }
 }
 
 .form-footer { text-align: center; margin-top: 20px; color: var(--text-muted); font-size: 13px; }
-.form-footer a { color: var(--gold); font-weight: 600; }
+.form-footer a { color: var(--pink); font-weight: 600; }
 
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: var(--bg-primary); }
