@@ -3,51 +3,126 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Feed – OnlyOGS</title>
+    <title>Feed - OnlyOGs</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <div class="header">
-        <h1>🔥 OnlyOGs</h1>
-        <div class="auth-buttons">
-            <span>Welcome, {{ user.username }}!</span>
-            <a href="/create_post"><button>+ Create Post</button></a>
-            <a href="/logout"><button>Logout</button></a>
+    <!-- HEADER -->
+    <header class="feed-header">
+        <div class="header-left">
+            <h1>🔥 OnlyOGs</h1>
         </div>
+        <div class="header-right">
+            <span class="welcome-text">Welcome, {{ current_user.username }}!</span>
+            <a href="{{ url_for('logout') }}" class="logout-btn">Logout</a>
+        </div>
+    </header>
+
+    <!-- MAIN FEED -->
+    <div class="feed-wrapper">
+        <!-- MOMENTS SECTION -->
+        <section class="moments-section">
+            <div class="moments-header">
+                <h2>📸 Tap to View • Disappears in 24h</h2>
+            </div>
+            <div class="moments-carousel">
+                <div class="moment-card">
+                    <div class="moment-placeholder">+</div>
+                    <p>Your Story</p>
+                </div>
+                <div class="moment-card">
+                    <div class="moment-placeholder-2"></div>
+                </div>
+                <div class="moment-card">
+                    <div class="moment-placeholder-3"></div>
+                </div>
+                <div class="moment-card">
+                    <div class="moment-placeholder-4"></div>
+                </div>
+                <div class="moment-card">
+                    <div class="moment-placeholder-5"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- LIVE LOUNGE SECTION -->
+        <section class="live-lounge-section">
+            <div class="lounge-header">
+                <h2>🎙️ LIVE LOUNGE</h2>
+                <p>Real Ones Only</p>
+            </div>
+
+            <!-- ACTIVE SPEAKERS GRID -->
+            <div class="speakers-grid">
+                <div class="speaker-avatar" data-badge="1">
+                    <div class="avatar-circle av1"></div>
+                </div>
+                <div class="speaker-avatar" data-badge="2">
+                    <div class="avatar-circle av2"></div>
+                </div>
+                <div class="speaker-avatar" data-badge="0">
+                    <div class="avatar-circle av3"></div>
+                </div>
+                <div class="speaker-avatar" data-badge="1">
+                    <div class="avatar-circle av4"></div>
+                </div>
+                <div class="speaker-avatar" data-badge="0">
+                    <div class="avatar-circle av5"></div>
+                </div>
+                <div class="speaker-avatar" data-badge="0">
+                    <div class="avatar-circle av6"></div>
+                </div>
+                <div class="speaker-avatar" data-badge="1">
+                    <div class="avatar-circle av7"></div>
+                </div>
+                <div class="speaker-avatar" data-badge="2">
+                    <div class="avatar-circle av8"></div>
+                </div>
+            </div>
+
+            <!-- JOIN LOUNGE BUTTON -->
+            <button class="join-lounge-btn">JOIN LOUNGE</button>
+        </section>
+
+        <!-- EMPTY FEED PLACEHOLDER -->
+        <section class="feed-posts-section">
+            <div class="feed-empty">
+                <div class="feed-empty-icon">🔒</div>
+                <h2>No Posts Yet</h2>
+                <p>Be the first OG to post something exclusive</p>
+                <div class="coming-soon">COMING SOON</div>
+            </div>
+        </section>
     </div>
 
-    <div class="content">
-        {% if posts %}
-            {% for item in posts %}
-                <div class="post">
-                    <div class="post-header">
-                        <a href="/user/{{ item.post.user.username }}" class="username">@{{ item.post.user.username }}</a>
-                        <span class="timestamp">{{ item.post.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
-                    </div>
-                    <div class="post-body">{{ item.post.body }}</div>
-                    <div class="post-actions">
-                        <a href="/like/{{ item.post.id }}">❤️ {{ item.likes }} Likes</a>
-                        <span>💬 {{ item.comments|length }} Comments</span>
-                    </div>
-                    {% if item.comments %}
-                        <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border);">
-                            {% for c in item.comments %}
-                                <p style="font-size: 13px; color: var(--text-secondary); margin: 6px 0;">
-                                    <strong>@{{ c.user.username }}</strong>: {{ c.body }}
-                                </p>
-                            {% endfor %}
-                        </div>
-                    {% endif %}
-                </div>
-            {% endfor %}
-        {% else %}
-            <div class="empty">
-                <span class="empty-lock">🔒</span>
-                <h3>No Posts Yet</h3>
-                <p>Be the first OG to post something exclusive</p>
-                <div class="empty-badge">Coming Soon</div>
-            </div>
-        {% endif %}
-    </div>
+    <!-- BOTTOM NAVIGATION -->
+    <nav class="bottom-nav">
+        <a href="#moments" class="nav-item">
+            <span class="nav-icon">📸</span>
+            <span class="nav-label">Moments</span>
+        </a>
+        <a href="#lounge" class="nav-item">
+            <span class="nav-icon">🎙️</span>
+            <span class="nav-label">Voice Lounge</span>
+        </a>
+        <a href="#invites" class="nav-item">
+            <span class="nav-icon">✉️</span>
+            <span class="nav-badge">3</span>
+            <span class="nav-label">Invites</span>
+        </a>
+        <a href="#profile" class="nav-item">
+            <span class="nav-icon">👤</span>
+            <span class="nav-label">Profile</span>
+        </a>
+    </nav>
+
+    <script>
+        // Add interactivity for speaker avatars
+        document.querySelectorAll('.speaker-avatar').forEach(avatar => {
+            avatar.addEventListener('click', function() {
+                alert('Joining speaker: ' + this.getAttribute('data-badge'));
+            });
+        });
+    </script>
 </body>
 </html>
