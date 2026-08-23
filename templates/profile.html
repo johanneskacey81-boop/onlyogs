@@ -1,16 +1,42 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Create Post – OnlyOGS</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile – OnlyOGS</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <h2>Create a Post</h2>
+    <div class="header">
+        <h1>🔥 OnlyOGs</h1>
+        <div class="auth-buttons">
+            <a href="/feed"><button>← Back to Feed</button></a>
+        </div>
+    </div>
 
-    <form method="POST">
-        <textarea name="body" placeholder="What's on your mind?" required></textarea><br><br>
-        <button type="submit">Post</button>
-    </form>
+    <div class="content">
+        <div style="margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid var(--border);">
+            <h1 class="username">@{{ user.username }}</h1>
+            <p style="color: var(--text-secondary); font-size: 14px;">{{ posts|length }} Posts</p>
+        </div>
 
-    <p><a href="/feed">Back to Feed</a></p>
+        {% if posts %}
+            {% for post in posts %}
+                <div class="post">
+                    <div class="post-header">
+                        <a href="/user/{{ post.user.username }}" class="username">@{{ post.user.username }}</a>
+                        <span class="timestamp">{{ post.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+                    </div>
+                    <div class="post-body">{{ post.body }}</div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty">
+                <span class="empty-lock">📝</span>
+                <h3>No Posts Yet</h3>
+                <p>@{{ user.username }} hasn't posted anything yet</p>
+            </div>
+        {% endif %}
+    </div>
 </body>
 </html>
