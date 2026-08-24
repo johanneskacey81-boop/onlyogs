@@ -107,10 +107,9 @@
             <span class="nav-icon">🎙️</span>
             <span class="nav-label">Voice Lounge</span>
         </a>
-        <a href="#invites" class="nav-item">
-            <span class="nav-icon">✉️</span>
-            <span class="nav-badge">3</span>
-            <span class="nav-label">Invites</span>
+        <a href="{{ url_for('ghost_messages') }}" class="nav-item">
+            <span class="nav-icon">👻</span>
+            <span class="nav-label">Ghost Mode</span>
         </a>
         <a href="{{ url_for('user_profile', username=current_user.username) }}" class="nav-item">
             <span class="nav-icon">👤</span>
