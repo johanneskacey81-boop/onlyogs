@@ -7,9 +7,8 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "super-secret-change-me"
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///onlyogs.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-
+app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL", "sqlite:///onlyogs.db")
 db = SQLAlchemy(app)
 login_manager = LoginManager(app)
 login_manager.login_view = "login"
